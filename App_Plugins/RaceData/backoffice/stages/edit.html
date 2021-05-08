@@ -1,0 +1,63 @@
+﻿<div data-element="editor-languages" ng-controller="RaceData.StageEditController as vm" class="clearfix">
+
+    <form name="editStageForm" no-validate val-form-manager>
+
+        <umb-editor-view>
+
+            <umb-editor-header name="vm.page.name"
+                               name-locked="false"
+                               hide-icon="true"
+                               hide-description="true"
+                               hide-alias="true">
+            </umb-editor-header>
+
+            <umb-editor-container class="form-horizontal">
+
+                <umb-load-indicator ng-if="vm.loading"></umb-load-indicator>
+
+                <umb-box ng-if="!vm.loading">
+                    <umb-box-content>
+                        <label>From: </label>
+                        <input name="from" ng-model="vm.stage.from" />
+                    </umb-box-content>
+                    <umb-box-content>
+                        <label>To: </label>
+                        <input name="to" ng-model="vm.stage.to" />
+                    </umb-box-content>
+                    <umb-box-content>
+                        <label>Distance (kms): </label>
+                        <input name="from" type="number" ng-model="vm.stage.distance" />
+                    </umb-box-content>
+                </umb-box>
+
+            </umb-editor-container>
+
+            <umb-editor-footer>
+
+                <umb-editor-footer-content-left>
+                    <umb-breadcrumbs ancestors="vm.breadcrumbs"
+                                     allow-on-open="true"
+                                     on-open="vm.goToPage(ancestor)">
+                    </umb-breadcrumbs>
+                </umb-editor-footer-content-left>
+
+                <umb-editor-footer-content-right>
+                    <umb-button-group ng-if="vm.page.defaultButton"
+                                      button-style="success"
+                                      default-button="vm.page.defaultButton"
+                                      sub-buttons="vm.page.subButtons"
+                                      state="vm.page.buttonGroupState"
+                                      direction="up"
+                                      float="right"
+                                      label-key="buttons_morePublishingOptions"
+                                      label="More publishing options">
+                    </umb-button-group>
+                </umb-editor-footer-content-right>
+
+            </umb-editor-footer>
+
+        </umb-editor-view>
+
+    </form>
+
+</div>

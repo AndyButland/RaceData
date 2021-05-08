@@ -1,0 +1,6 @@
+﻿﻿{
+    "javascript": [
+        "~/App_Plugins/RaceData/backoffice/stages/stage.resource.js",
+        "~/App_Plugins/RaceData/backoffice/stages/edit.controller.js"
+    ]
+}
