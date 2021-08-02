@@ -16,18 +16,21 @@
                 <umb-load-indicator ng-if="vm.loading"></umb-load-indicator>
 
                 <umb-box ng-if="!vm.loading">
+                    <table cellpadding="10">
+                        <tr>
+                            <td><label style="font-weight: bold">From: </label></td>
+                            <td><input name="from" ng-model="vm.stage.from" /></td>
+                        </tr>
+                        <tr>
+                            <td><label style="font-weight: bold">To: </label></td>
+                            <td><input name="to" ng-model="vm.stage.to" /></td>
+                        </tr>
+                        <tr>
+                            <td><label style="font-weight: bold">Distance (kms): </label></td>
+                            <td><input name="from" type="number" ng-model="vm.stage.distance" /></td>
+                        </tr>
+                    </table>
                     <umb-box-content>
-                        <label>From: </label>
-                        <input name="from" ng-model="vm.stage.from" />
-                    </umb-box-content>
-                    <umb-box-content>
-                        <label>To: </label>
-                        <input name="to" ng-model="vm.stage.to" />
-                    </umb-box-content>
-                    <umb-box-content>
-                        <label>Distance (kms): </label>
-                        <input name="from" type="number" ng-model="vm.stage.distance" />
-                    </umb-box-content>
                 </umb-box>
 
             </umb-editor-container>

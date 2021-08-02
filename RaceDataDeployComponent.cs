@@ -46,10 +46,11 @@ namespace RaceData.CustomData
                         PermittedToRestore = true,
                         SupportsPartialRestore = true,
                     },
+                    false,
                     AppConstants.TreeAliases.Stages,
                     (string routePath) => true,
                     (string nodeId) => true,
-                    (string nodeId) => ParseEntityId(nodeId));
+                    (string nodeId, out Guid entityId) => Guid.TryParse(nodeId, out entityId));
 
                 _transferEntityService.RegisterTransferEntityType(
                     AppConstants.UdiEntityTypes.Team,
@@ -62,10 +63,11 @@ namespace RaceData.CustomData
                         PermittedToRestore = true,
                         SupportsPartialRestore = true,
                     },
+                    false,
                     AppConstants.TreeAliases.Teams,
                     (string routePath) => routePath.Contains($"/teamEdit/") || routePath.Contains($"/teamsOverview"),
                     (string nodeId) => nodeId == "-1" || nodeId.StartsWith(AppConstants.TreeNodeIdPrefixes.Team),
-                    (string nodeId) => ParseNodeIdFromPrefixedValue(nodeId, AppConstants.TreeNodeIdPrefixes.Team));
+                    (string nodeId, out Guid entityId) => TryParseNodeIdFromPrefixedValue(nodeId, AppConstants.TreeNodeIdPrefixes.Team, out entityId));
 
                 _transferEntityService.RegisterTransferEntityType(
                     AppConstants.UdiEntityTypes.Rider,
@@ -77,26 +79,30 @@ namespace RaceData.CustomData
                         PermittedToRestore = true,
                         SupportsPartialRestore = true,
                     },
+                    false,
                     AppConstants.TreeAliases.Teams,
                     (string routePath) => routePath.Contains($"/riderEdit/"),
                     (string nodeId) => nodeId.StartsWith(AppConstants.TreeNodeIdPrefixes.Rider),
-                    (string nodeId) => ParseNodeIdFromPrefixedValue(nodeId, AppConstants.TreeNodeIdPrefixes.Rider));
+                    (string nodeId, out Guid entityId) => TryParseNodeIdFromPrefixedValue(nodeId, AppConstants.TreeNodeIdPrefixes.Rider, out entityId));
             }
             else
             {
                 _diskEntityService.RegisterDiskEntityType(AppConstants.UdiEntityTypes.Stage);
+                _diskEntityService.RegisterDiskEntityType(AppConstants.UdiEntityTypes.Team);
+                _diskEntityService.RegisterDiskEntityType(AppConstants.UdiEntityTypes.Rider);
             }
 
             _raceDataService.StageSaved += StageServiceOnSaved;
+            _raceDataService.TeamSaved += TeamServiceOnSaved;
+            _raceDataService.RiderSaved+= RiderServiceOnSaved;
 
             _signatureService.RegisterHandler<RaceDataService, StageEventArgs>(nameof(IRaceDataService.StageSaved), (refresher, args) => refresher.SetSignature(GetArtifact(args)));
             _signatureService.RegisterHandler<RaceDataService, StageEventArgs>(nameof(IRaceDataService.StageDeleted), (refresher, args) => refresher.ClearSignature(args.Stage.GetUdi()));
 
         }
 
-        private static Guid ParseEntityId(string nodeId) => Guid.Parse(nodeId);
-
-        private static Guid ParseNodeIdFromPrefixedValue(string nodeId, string prefix) => Guid.Parse(nodeId.Substring(prefix.Length));
+        private static bool TryParseNodeIdFromPrefixedValue(string nodeId, string prefix, out Guid entityId) =>
+            Guid.TryParse(nodeId.Substring(prefix.Length), out entityId);
 
         private void StageServiceOnSaved(object sender, StageEventArgs e)
         {
@@ -115,6 +121,44 @@ namespace RaceData.CustomData
         {
             var udi = e.Stage.GetUdi();
             return _serviceConnectorFactory.GetConnector(udi.EntityType).GetArtifact(e.Stage);
+        }
+
+        private void TeamServiceOnSaved(object sender, TeamEventArgs e)
+        {
+            var artifact = GetArtifact(e);
+
+            if (!_transferRaceDataAsContent)
+            {
+
+                _diskEntityService.WriteArtifacts(new[] { artifact });
+            }
+
+            _signatureService.SetSignature(artifact);
+        }
+
+        private IArtifact GetArtifact(TeamEventArgs e)
+        {
+            var udi = e.Team.GetUdi();
+            return _serviceConnectorFactory.GetConnector(udi.EntityType).GetArtifact(e.Team);
+        }
+
+        private void RiderServiceOnSaved(object sender, RiderEventArgs e)
+        {
+            var artifact = GetArtifact(e);
+
+            if (!_transferRaceDataAsContent)
+            {
+
+                _diskEntityService.WriteArtifacts(new[] { artifact });
+            }
+
+            _signatureService.SetSignature(artifact);
+        }
+
+        private IArtifact GetArtifact(RiderEventArgs e)
+        {
+            var udi = e.Rider.GetUdi();
+            return _serviceConnectorFactory.GetConnector(udi.EntityType).GetArtifact(e.Rider);
         }
 
         public void Terminate()
